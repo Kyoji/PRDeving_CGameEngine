@@ -1,9 +1,11 @@
-//
-// Created by kyoji on 6/6/2019.
-//
-
-#include "StateManager.h"
+#include "statemanager.h"
 #include <stdlib.h>
+
+int STATEMANAGER_scale(StateManager *statemanager) {
+    statemanager -> capacity *= 2;
+    statemanager -> stack = realloc(statemanager -> stack, statemanager -> capacity * sizeof(State*));
+    return statemanager -> capacity;
+}
 
 int STATEMANAGER_init(StateManager *statemanager) {
     statemanager -> capacity = 3;
@@ -20,14 +22,8 @@ int STATEMANAGER_free(StateManager *statemanager) {
     return 0;
 }
 
-int STATEMANAGER_scale(StateManager *statemanager) {
-    statemanager -> capacity *= 2;
-    statemanager -> stack = realloc(statemanager -> stack, statemanager -> capacity * sizeof(State*));
-}
-
 int STATEMANAGER_push(StateManager *statemanager, State *state) {
-    if (statemanager -> top + 1 == statemanager -> capacity)
-        STATEMANAGER_scale(statemanager);
+    if (statemanager -> top + 1 == statemanager -> capacity) STATEMANAGER_scale(statemanager);
     statemanager -> top++;
     statemanager -> stack[statemanager -> top] = state;
     if (state -> init != NULL) state -> init();
@@ -37,7 +33,7 @@ int STATEMANAGER_push(StateManager *statemanager, State *state) {
 int STATEMANAGER_pop(StateManager *statemanager) {
     if (statemanager -> top == -1) return 0;
     State *top = STATEMANAGER_top(statemanager);
-    if( top -> destroy != NULL) top -> destroy();
+    if (top -> destroy != NULL) top -> destroy();
     statemanager -> stack[statemanager -> top] = NULL;
     statemanager -> top--;
     return statemanager -> top;
@@ -49,12 +45,12 @@ State *STATEMANAGER_top(StateManager *statemanager) {
 
 int STATEMANAGER_update(StateManager *statemanager, float deltatime) {
     State *state = STATEMANAGER_top(statemanager);
-    if(state -> update != NULL) return state -> update(deltatime);
+    if (state -> update != NULL) return state -> update(deltatime);
     return 1;
 }
 
 int STATEMANAGER_draw(StateManager *statemanager, float deltatime) {
     State *state = STATEMANAGER_top(statemanager);
-    if(state -> draw != NULL) return state -> draw(deltatime);
+    if (state -> draw != NULL) return state -> draw(deltatime);
     return 1;
 }
